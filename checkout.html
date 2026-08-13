@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout - CHAINZ WEARS</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: #f5f5f5; min-height: 100vh; }
+        
+        .checkout-header {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            padding: 2rem 0;
+            text-align: center;
+        }
+        .checkout-header h1 { color: white; font-size: 2rem; }
+        .checkout-header p { color: #aaa; margin: 0; }
+        
+        .checkout-container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 2rem;
+        }
+        
+        @media (max-width: 992px) {
+            .checkout-container { grid-template-columns: 1fr; }
+        }
+        
+        .section-title {
+            font-size: 1.3rem;
+            color: #2c3e50;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #27ae60;
+        }
+        
+        .form-card {
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .form-label {
+            font-weight: 600;
+            color: #34495e;
+            margin-bottom: 0.5rem;
+        }
+        
+        .form-control, .form-select {
+            padding: 0.75rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: #27ae60;
+            box-shadow: none;
+        }
+        
+        .required::after {
+            content: ' *';
+            color: red;
+        }
+        
+        /* Payment Methods */
+        .payment-methods {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 1rem;
+        }
+        
+        @media (max-width: 576px) {
+            .payment-methods { grid-template-columns: repeat(2, 1fr); }
+        }
+        
+        .payment-option {
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .payment-option:hover {
+            border-color: #27ae60;
+        }
+        
+        .payment-option.selected {
+            border-color: #27ae60;
+            background: #e8f8f0;
+        }
+        
+        .payment-option input {
+            display: none;
+        }
+        
+        .payment-option .icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .payment-option .name {
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 0.9rem;
+        }
+        
+        /* Order Summary */
+        .order-summary {
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 1rem;
+        }
+        
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .summary-item:last-child {
+            border-bottom: none;
+        }
+        
+        .item-name { color: #34495e; }
+        .item-price { color: #2c3e50; font-weight: 600; }
+        
+        .summary-total {
+            display: flex;
+            justify-content: space-between;
+            padding: 1rem 0;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #27ae60;
+            border-top: 2px solid #27ae60;
+            margin-top: 1rem;
+        }
+        
+        .place-order-btn {
+            width: 100%;
+            padding: 1rem;
+            background: #27ae60;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        
+        .place-order-btn:hover {
+            background: #219a52;
+        }
+        
+        .place-order-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .security-note {
+            text-align: center;
+            margin-top: 1rem;
+            color: #888;
+            font-size: 0.85rem;
+        }
+        
+        .security-note span {
+            color: #27ae60;
+        }
+        
+        .empty-cart-message {
+            text-align: center;
+            padding: 3rem;
+        }
+        
+        .empty-cart-message h3 {
+            color: #2c3e50;
+            margin-bottom: 1rem;
+        }
+        
+        .empty-cart-message p {
+            color: #666;
+            margin-bottom: 1.5rem;
+        }
+        
+        .back-to-shop {
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            background: #3498db;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            transition: background 0.3s ease;
+        }
+        
+        .back-to-shop:hover {
+            background: #2980b9;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="checkout-header">
+        <h1>🛒 Checkout</h1>
+        <p>Complete your order at CHAINZ WEARS</p>
+    </div>
+
+    <div class="checkout-container" id="checkoutContent">
+        <!-- Left Column: Shipping & Payment -->
+        <div class="checkout-form">
+            <!-- Shipping Information -->
+            <div class="form-card">
+                <h2 class="section-title">📍 Shipping Information</h2>
+                <form id="shippingForm">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label class="form-label required">First Name</label>
+                            <input type="text" class="form-control" id="firstName" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label required">Last Name</label>
+                            <input type="text" class="form-control" id="lastName" required>
+                        </div>
+                    </div>
+                    
+                    <label class="form-label required">Email Address</label>
+                    <input type="email" class="form-control" id="email" required>
+                    
+                    <label class="form-label required">Phone Number</label>
+                    <input type="tel" class="form-control" id="phone" placeholder="+1 (555) 123-4567" required>
+                    
+                    <label class="form-label required">Street Address</label>
+                    <input type="text" class="form-control" id="address" placeholder="123 Main Street" required>
+                    
+                    <label class="form-label">Landmark (Optional)</label>
+                    <input type="text" class="form-control" id="landmark" placeholder="Near shopping mall">
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label class="form-label required">Country</label>
+                            <select class="form-select" id="country" required>
+                                <option value="">Select Country</option>
+                                <option value="US">United States</option>
+                                <option value="UK">United Kingdom</option>
+                                <option value="CA">Canada</option>
+                                <option value="AU">Australia</option>
+                                <option value="NG">Nigeria</option>
+                                <option value="GH">Ghana</option>
+                                <option value="KE">Kenya</option>
+                                <option value="ZA">South Africa</option>
+                                <option value="OTHER">Other</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label required">City</label>
+                            <input type="text" class="form-control" id="city" required>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label class="form-label required">State/Province</label>
+                            <input type="text" class="form-control" id="state" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">ZIP/Postal Code</label>
+                            <input type="text" class="form-control" id="zipCode">
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Payment Methods -->
+            <div class="form-card">
+                <h2 class="section-title">💳 Payment Method</h2>
+                <div class="payment-methods">
+                        <label class="payment-option" onclick="selectPayment('binance')">
+                            <input type="radio" name="payment" value="binance">
+                            <div class="icon">🟨</div>
+                            <div class="name">Binance Pay</div>
+                        </label>
+                        <label class="payment-option" onclick="selectPayment('btc')">
+                            <input type="radio" name="payment" value="btc">
+                            <div class="icon">₿</div>
+                            <div class="name">Bitcoin</div>
+                        </label>
+                        <label class="payment-option" onclick="selectPayment('quickteller')">
+                            <input type="radio" name="payment" value="quickteller">
+                            <div class="icon">🇳🇬</div>
+                            <div class="name">Quickteller (NGN)</div>
+                        </label>
+                        <label class="payment-option" onclick="selectPayment('opay')">
+                            <input type="radio" name="payment" value="opay">
+                            <div class="icon">🟦</div>
+                            <div class="name">Opay (NGN)</div>
+                        </label>
+                        <label class="payment-option" onclick="selectPayment('carding')">
+                            <input type="radio" name="payment" value="carding">
+                            <div class="icon">💳</div>
+                            <div class="name">Card Payment</div>
+                        </label>
+                        <label class="payment-option" onclick="selectPayment('giftcard')">
+                            <input type="radio" name="payment" value="giftcard">
+                            <div class="icon">🎁</div>
+                            <div class="name">Gift Card</div>
+                        </label>
+                </div>
+                <div id="paymentDetails"></div>
+            </div>
+        </div>
+
+        <!-- Right Column: Order Summary -->
+        <div class="order-summary">
+            <h2 class="section-title">📦 Order Summary</h2>
+            <div id="orderItems"></div>
+            <div class="summary-total">
+                <span>Total:</span>
+                <span id="orderTotal">$0.00</span>
+            </div>
+            <button class="place-order-btn" id="placeOrderBtn" onclick="placeOrder()" disabled>
+                Place Order
+            </button>
+            <div class="security-note">
+                🔒 <span>Secure Checkout</span> - Your information is protected
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let cart = JSON.parse(localStorage.getItem('cart')) || [];
+        let selectedPayment = null;
+        let orderTotalUSD = 0;
+        const exchangeRates = { NGN: 750, BTC_USD: 30000 }; // example rates
+
+        // Load cart items
+        function loadOrderSummary() {
+            const orderItems = document.getElementById('orderItems');
+            const orderTotal = document.getElementById('orderTotal');
+            const placeOrderBtn = document.getElementById('placeOrderBtn');
+
+            if (cart.length === 0) {
+                document.getElementById('checkoutContent').innerHTML = `
+                    <div style="grid-column: 1 / -1;">
+                        <div class="form-card">
+                            <div class="empty-cart-message">
+                                <h3>Your cart is empty</h3>
+                                <p>Add some products to your cart before checking out.</p>
+                                <a href="welcome.html" class="back-to-shop">← Back to Shop</a>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            let total = 0;
+
+            cart.forEach(item => {
+                const price = parseFloat(item.price.replace('$', ''));
+                const itemTotal = price * item.qty;
+                total += itemTotal;
+
+                html += `
+                    <div class="summary-item">
+                        <div class="item-name">${item.name} <small>(x${item.qty})</small></div>
+                        <div class="item-price">$${itemTotal.toFixed(2)}</div>
+                    </div>
+                `;
+            });
+
+            orderItems.innerHTML = html;
+            orderTotalUSD = total;
+            orderTotal.textContent = '$' + total.toFixed(2);
+            placeOrderBtn.disabled = false;
+        }
+
+        // Payment selection
+        function selectPayment(method) {
+            selectedPayment = method;
+            document.querySelectorAll('.payment-option').forEach(opt => { opt.classList.remove('selected'); });
+            event.currentTarget.classList.add('selected');
+            const details = document.getElementById('paymentDetails');
+            let detailsHtml = '';
+
+            // compute display total depending on payment method
+            const orderTotalElem = document.getElementById('orderTotal');
+            if (method === 'quickteller' || method === 'opay') {
+                const ngn = orderTotalUSD * exchangeRates.NGN;
+                orderTotalElem.textContent = '₦' + ngn.toFixed(2) + ' (approx)';
+            } else if (method === 'btc') {
+                const btc = orderTotalUSD / exchangeRates.BTC_USD;
+                orderTotalElem.textContent = btc.toFixed(6) + ' BTC (approx)';
+            } else {
+                orderTotalElem.textContent = '$' + orderTotalUSD.toFixed(2);
+            }
+
+            switch(method) {
+                case 'binance':
+                    detailsHtml = `<div style="margin-top:1rem;padding:1rem;background:#f8f9fa;border-radius:8px;">\n                                    <h5>Binance Pay</h5>\n                                    <p style="color:#666;">After placing the order you'll receive a Binance wallet address via email.</p>\n                                </div>`;
+                    break;
+                case 'btc':
+                    detailsHtml = `<div style="margin-top:1rem;padding:1rem;background:#f8f9fa;border-radius:8px;">\n                                    <h5>Bitcoin</h5>\n                                    <p style="color:#666;">Send BTC to our wallet. Address provided after order.</p>\n                                </div>`;
+                    break;
+                case 'quickteller':
+                    detailsHtml = `<div style="margin-top:1rem;padding:1rem;background:#f8f9fa;border-radius:8px;">\n                                    <h5>Quickteller (NGN)</h5>\n                                    <p style="color:#666;">You'll be given account details via email to complete the transfer in NGN.</p>\n                                </div>`;
+                    break;
+                case 'opay':
+                    detailsHtml = `<div style="margin-top:1rem;padding:1rem;background:#f8f9fa;border-radius:8px;">\n                                    <h5>Opay (NGN)</h5>\n                                    <p style="color:#666;">Opay instructions will be sent to your email.</p>\n                                </div>`;
+                    break;
+                case 'carding':
+                    detailsHtml = `<div style="margin-top:1rem;padding:1rem;background:#f8f9fa;border-radius:8px;">\n                                    <h5>Card Payment</h5>\n                                    <p style="color:#666;">Enter card details below to pay now.</p>\n                                    <input type="text" class="form-control" placeholder="Card Number" style="margin-top:0.5rem;">\n                                    <div class="row">\n                                        <div class="col-6">\n                                            <input type="text" class="form-control" placeholder="MM/YY">\n                                        </div>\n                                        <div class="col-6">\n                                            <input type="text" class="form-control" placeholder="CVV">\n                                        </div>\n                                    </div>\n                                </div>`;
+                    break;
+                case 'giftcard':
+                    detailsHtml = `<div style="margin-top:1rem;padding:1rem;background:#f8f9fa;border-radius:8px;">\n                                    <h5>Gift Card</h5>\n                                    <p style="color:#666;">Enter your gift card code below:</p>\n                                    <input type="text" class="form-control" placeholder="Gift Card Code">\n                                </div>`;
+                    break;
+            }
+            details.innerHTML = detailsHtml;
+        }
+
+        // Place order
+        function placeOrder() {
+            // Validate shipping form
+            const form = document.getElementById('shippingForm');
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+
+            if (!selectedPayment) {
+                alert('Please select a payment method!');
+                return;
+            }
+
+            // Get shipping info
+            const shipping = {
+                firstName: document.getElementById('firstName').value,
+                lastName: document.getElementById('lastName').value,
+                email: document.getElementById('email').value,
+                phone: document.getElementById('phone').value,
+                address: document.getElementById('address').value,
+                landmark: document.getElementById('landmark').value,
+                country: document.getElementById('country').value,
+                city: document.getElementById('city').value,
+                state: document.getElementById('state').value,
+                zipCode: document.getElementById('zipCode').value
+            };
+
+            // Calculate total
+            const total = cart.reduce((sum, item) => {
+                return sum + (parseFloat(item.price.replace('$', '')) * item.qty);
+            }, 0);
+
+            // Build order summary and forward via mailto to admin emails
+            const adminEmails = ['mumonwuking20@gmail.com','mumonwumonica@gmail.com'];
+            const itemsList = cart.map(it => `${it.name} (${it.size||'N/A'}) x${it.qty} - ${it.price}`).join('\n');
+            let displayAmount = '$' + total.toFixed(2);
+            if (selectedPayment === 'quickteller' || selectedPayment === 'opay') {
+                displayAmount = '₦' + (total * exchangeRates.NGN).toFixed(2);
+            } else if (selectedPayment === 'btc') {
+                displayAmount = (total / exchangeRates.BTC_USD).toFixed(6) + ' BTC';
+            }
+
+            const mailSubject = encodeURIComponent('New Order from ' + shipping.firstName + ' ' + shipping.lastName);
+            const mailBody = encodeURIComponent(`Order Details:\n\n${itemsList}\n\nTotal: ${displayAmount}\nPayment Method: ${selectedPayment}\n\nShipping:\n${shipping.firstName} ${shipping.lastName}\n${shipping.address}\n${shipping.city}, ${shipping.state}\n${shipping.country}\nPhone: ${shipping.phone}\nEmail: ${shipping.email}`);
+            const mailto = 'mailto:' + adminEmails.join(',') + '?subject=' + mailSubject + '&body=' + mailBody + '&cc=' + encodeURIComponent(shipping.email);
+
+            // Open mail client (user can send payment details) and show receipt
+            window.location.href = mailto;
+
+            const expectDays = Math.floor(Math.random()*7)+7; // 7-13 days
+            const expectDate = new Date(); expectDate.setDate(expectDate.getDate()+expectDays);
+
+            document.getElementById('checkoutContent').innerHTML = `\n                <div style="grid-column:1/-1;">\n                    <div class="form-card">\n                        <h3>Payment Initiated</h3>\n                        <p>We have sent the payment instructions to the admin emails. You will receive confirmation once payment is verified.</p>\n                        <h5>Receipt</h5>\n                        <pre style="background:#f7f7f7;padding:10px;border-radius:6px;">Order for ${shipping.firstName} ${shipping.lastName}\n\n${itemsList}\n\nTotal: ${displayAmount}\nPayment Method: ${selectedPayment}\nExpected delivery date: ${expectDate.toDateString()}</pre>\n                        <a href="welcome.html" class="back-to-shop">Back to Shop</a>\n                    </div>\n                </div>\n            `;
+            // clear cart
+            localStorage.removeItem('cart');
+            cart = [];
+        }
+
+        // Initialize
+        loadOrderSummary();
+    </script>
+</body>
+</html>

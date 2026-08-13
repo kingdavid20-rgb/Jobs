@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CHAINZ WEARS - Welcome</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; min-height: 100vh; display: flex; flex-direction: column; }
+        
+        /* Black Friday Scrolling Ads */
+        .ads-banner { background: linear-gradient(90deg, #000000, #1a1a1a, #000000); overflow: hidden; padding: 12px 0; }
+        .ads-track { display: flex; animation: scrollLeft 30s linear infinite; width: max-content; }
+        .ads-track:hover { animation-play-state: paused; }
+        @keyframes scrollLeft { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+        .ad-item { display: inline-flex; align-items: center; white-space: nowrap; padding: 0 2rem; color: #fff; font-size: 1.1rem; }
+        .ad-item .discount { color: #ff4444; font-weight: bold; font-size: 1.3rem; margin-right: 10px; }
+        .ad-item .product-name { color: #ffd700; margin-right: 10px; }
+        .ad-item .price { color: #00ff88; font-weight: bold; }
+        
+        /* Cart Icon with Badge */
+        .cart-icon-container { position: relative; cursor: pointer; transform: translateY(6px); }
+        .cart-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: red;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+        .cart-badge.hidden { display: none; }
+        
+        /* Cart Dropdown */
+        .cart-dropdown {
+            position: absolute;
+            right: 0;
+            top: 100%;
+            width: 420px;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            z-index: 1000;
+            display: none;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        .cart-dropdown.active { display: block; }
+        .cart-dropdown-header { padding: 15px; border-bottom: 1px solid #eee; font-weight: bold; color: #2c3e50; }
+        .cart-item { display: flex; padding: 12px; border-bottom: 1px solid #eee; gap: 10px; align-items: center; }
+        .cart-item-image { width: 70px; height: 70px; object-fit: cover; border-radius: 4px; }
+        .cart-item-details { flex: 1; }
+        .cart-item-name { font-weight: 600; color: #2c3e50; margin-bottom: 5px; }
+        .cart-item-price { color: #27ae60; font-weight: bold; }
+        .cart-item-qty { color: #666; font-size: 0.9rem; }
+        .cart-empty { padding: 30px; text-align: center; color: #888; }
+        .cart-footer { padding: 15px; border-top: 1px solid #eee; }
+        .cart-total { display: flex; justify-content: space-between; font-weight: bold; font-size: 1.1rem; margin-bottom: 12px; }
+        .checkout-btn { width: 100%; padding: 10px; background: #27ae60; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }
+        .checkout-btn:hover { background: #219a52; }
+        
+        /* User Welcome */
+        .user-welcome { display: flex; align-items: center; gap: 1rem; }
+        .user-welcome .user-icon { width: 40px; height: 40px; background: #3498db; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; }
+        .user-welcome .logout-btn { padding: 0.5rem 1rem; background: #e74c3c; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.9rem; text-decoration: none; }
+        
+        /* Search Bar */
+        .search-container { position: relative; max-width: 500px; margin: 0 auto; }
+        .search-input { width: 100%; padding: 0.75rem 1rem; padding-left: 45px; border: 2px solid #ddd; border-radius: 50px; font-size: 1rem; transition: border-color 0.3s; }
+        .search-input:focus { outline: none; border-color: #3498db; }
+        .search-icon { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #888; }
+        .search-suggestions { position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #ddd; border-radius: 0 0 10px 10px; max-height: 300px; overflow-y: auto; z-index: 1000; display: none; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .search-suggestions.active { display: block; }
+        .suggestion-item { padding: 12px 15px; cursor: pointer; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #f0f0f0; transition: background 0.2s; }
+        .suggestion-item:hover { background: #f8f9fa; }
+        .suggestion-item img { width: 40px; height: 40px; object-fit: cover; border-radius: 4px; }
+        .suggestion-item .name { flex: 1; color: #2c3e50; }
+        .suggestion-item .category { color: #888; font-size: 0.85rem; }
+        .suggestion-item .suggest-price { color: #27ae60; font-weight: bold; }
+        
+        main { flex: 1; padding: 2rem; max-width: 1400px; margin: 0 auto; width: 100%; }
+        .page-header { text-align: center; margin-bottom: 2rem; }
+        .page-header h1 { color: #2c3e50; font-size: 2rem; margin-bottom: 0.5rem; }
+        .category-section { margin-bottom: 3rem; }
+        .category-title { color: #2c3e50; font-size: 1.5rem; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 3px solid #3498db; display: inline-block; }
+        
+        /* Product Card with Add to Cart on Hover */
+        .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1.5rem; }
+        .product-card { background: white; border: 1px solid #e9ecef; border-radius: 8px; overflow: hidden; transition: transform 0.3s ease, box-shadow 0.3s ease; position: relative; }
+        .product-card:hover { transform: translateY(-5px); box-shadow: 0 8px 25px rgba(0,0,0,0.15); }
+        .product-image { width: 100%; height: 200px; object-fit: cover; background: #f8f9fa; }
+        .product-info { padding: 1rem; text-align: center; }
+        .product-info h3 { color: #2c3e50; font-size: 1rem; margin-bottom: 0.5rem; font-weight: 600; }
+        .product-price { color: #27ae60; font-size: 1.1rem; font-weight: bold; }
+        
+        /* Add to Cart Button */
+        .add-to-cart-btn {
+            position: absolute;
+            bottom: -50px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #27ae60;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: bottom 0.3s ease;
+            white-space: nowrap;
+        }
+        .product-card:hover .add-to-cart-btn { bottom: 10px; }
+        .add-to-cart-btn:hover { background: #219a52; }
+        
+        footer { background: #2c3e50; color: white; padding: 2rem; text-align: center; }
+        footer p { margin-bottom: 0.5rem; }
+
+        /* Modals */
+        .modal-backdrop-custom { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 2000; }
+        .modal-card { background: white; padding: 1.25rem; border-radius: 8px; max-width: 520px; width: 100%; }
+    </style>
+</head>
+<body>
+    <!-- Black Friday Scrolling Ads -->
+    <div class="ads-banner">
+        <div class="ads-track">
+            <div class="ad-item"><span class="discount">🔥 50% OFF</span> <span class="product-name">Classic Leather Belt</span> <span class="price">$22.50</span></div>
+            <div class="ad-item"><span class="discount">👜 NEW</span> <span class="product-name">Designer Satchel</span> <span class="price">$185.00</span></div>
+            <div class="ad-item"><span class="discount">👢 SALE</span> <span class="product-name">Chelsea Boots</span> <span class="price">$199.00</span></div>
+            <div class="ad-item"><span class="discount">🧥 HOT</span> <span class="product-name">Bomber Jacket</span> <span class="price">$299.00</span></div>
+            <div class="ad-item"><span class="discount">🏍️ NEW</span> <span class="product-name">Racing Jacket</span> <span class="price">$480.00</span></div>
+            <div class="ad-item"><span class="discount">✨ 30% OFF</span> <span class="product-name">Oxford Shoes</span> <span class="price">$154.00</span></div>
+            <div class="ad-item"><span class="discount">🎒 BEST</span> <span class="product-name">Leather Backpack</span> <span class="price">$120.00</span></div>
+            <div class="ad-item"><span class="discount">🐊 EXOTIC</span> <span class="product-name">Crocodile Leather</span> <span class="price">$250.00</span></div>
+        </div>
+    </div>
+
+    <!-- Bootstrap Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand fw-bold" href="welcome.html">CHAINZ WEARS</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="welcome.html">Home</a></li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="productsDropdown" role="button" data-bs-toggle="dropdown">Products</a>
+                        <ul class="dropdown-menu" aria-labelledby="productsDropdown">
+                            <li><h6 class="dropdown-header">By Category</h6></li>
+                            <li><a class="dropdown-item" href="products-bags.html">Bags</a></li>
+                            <li><a class="dropdown-item" href="products-belts.html">Leather Belts</a></li>
+                            <li><a class="dropdown-item" href="products-shoes.html">Shoes</a></li>
+                            <li><a class="dropdown-item" href="products-jackets.html">Leather Jackets</a></li>
+                            <li><a class="dropdown-item" href="products-biker.html">Biker Outfit</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><h6 class="dropdown-header">By Material</h6></li>
+                            <li><a class="dropdown-item" href="materials-leather.html">Leather Materials</a></li>
+                            <li><a class="dropdown-item" href="materials-animals.html">Animal Skin Designs</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item">
+                        <div class="user-welcome">
+                            <div class="user-icon">U</div>
+                            <span style="color: white;" id="userNameDisplay">Welcome</span>
+                            <a href="index.html" class="logout-btn">Logout</a>
+                        </div>
+                    </li>
+                    <li class="nav-item position-relative">
+                        <div class="cart-icon-container" id="cartIcon" title="View cart">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="white" viewBox="0 0 16 16" class="cart-svg">
+                                <path d="M0 1.5A.5.5 0 0 1 .5 1H2a.5.5 0 0 1 .485.379L2.89 3H14.5a.5.5 0 0 1 .491.592l-1.5 8A.5.5 0 0 1 13 12H4a.5.5 0 0 1-.491-.408L2.01 3.607 1.61 2H.5a.5.5 0 0 1-.5-.5zM5 12a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm7 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm-7 1a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm7 0a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
+                            </svg>
+                            <span class="cart-badge hidden" id="cartBadge">0</span>
+                        </div>
+                        <div class="cart-dropdown" id="cartDropdown">
+                            <div class="cart-dropdown-header">Shopping Cart</div>
+                            <div id="cartItems"></div>
+                            <div class="cart-empty" id="cartEmpty">Your cart is empty</div>
+                            <div class="cart-footer" id="cartFooter" style="display: none;">
+                                <div class="cart-total">
+                                    <span>Total:</span>
+                                    <span id="cartTotal">$0.00</span>
+                                </div>
+                                <button class="checkout-btn" onclick="window.location.href='checkout.html'">Proceed to Checkout</button>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <main>
+        <div class="page-header">
+            <h1>Welcome to CHAINZ WEARS</h1>
+            <p>Search for your desired leather products</p>
+        </div>
+
+        <!-- Search Bar with Autocomplete -->
+        <div class="search-container">
+            <span class="search-icon">🔍</span>
+            <input type="text" class="search-input" id="productSearch" placeholder="Search for products or images..." autocomplete="off">
+            <div class="search-suggestions" id="searchSuggestions"></div>
+        </div>
+
+        <br><br>
+
+        <!-- All Products Sections -->
+        <!-- Bags Category -->
+        <section class="category-section">
+            <h2 class="category-title">Bags</h2>
+            <div class="product-grid">
+                <div class="product-card"><img src="https://images.unsplash.com/photo-1590874103328-eac38a683ce7?w=400&h=300&fit=crop" class="product-image" alt="Leather Tote"><div class="product-info"><h3>Classic Leather Tote</h3><div class="product-price">$120.00</div></div><button class="add-to-cart-btn" onclick="openAddToCartModal('Classic Leather Tote', '$120.00', 'https://images.unsplash.com/photo-1590874103328-eac38a683ce7?w=400&h=300&fit=crop')">Add to Cart</button></div>
+                <div class="product-card"><img src="https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=400&h=300&fit=crop" class="product-image" alt="Designer Satchel"><div class="product-info"><h3>Designer Satchel</h3><div class="product-price">$185.00</div></div><button class="add-to-cart-btn" onclick="openAddToCartModal('Designer Satchel', '$185.00', 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=400&h=300&fit=crop')">Add to Cart</button></div>
+                <div class="product-card"><img src="https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=400&h=300&fit=crop" class="product-image" alt="Messenger Bag"><div class="product-info"><h3>Messenger Bag</h3><div class="product-price">$95.00</div></div><button class="add-to-cart-btn" onclick="openAddToCartModal('Messenger Bag', '$95.00', 'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=400&h=300&fit=crop')">Add to Cart</button></div>
+                <div class="product-card"><img src="https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=400&h=300&fit=crop" class="product-image" alt="Leather Backpack"><div class="product-info"><h3>Leather Backpack</h3><div class="product-price">$150.00</div></div><button class="add-to-cart-btn" onclick="openAddToCartModal('Leather Backpack', '$150.00', 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=400&h=300&fit=crop')">Add to Cart</button></div>
+            </div>
+        </section>
+
+        <!-- Leather Belts Category -->
+        <section class="category-section">
+            <h2 class="category-title">Leather Belts</h2>
+            <div class="product-grid">
+                <div class="product-card"><img src="https://images.unsplash.com/photo-1624222247344-550fb60583dc?w=400&h=300&fit=crop" class="product-image" alt="Black Belt"><div class="product-info"><h3>Classic Black Belt</h3><div class="product-price">$45.00</div></div><button class="add-to-cart-btn" onclick="openAddToCartModal('Classic Black Belt', '$45.00', 'https://images.unsplash.com/photo-1624222247344-550fb60583dc?w=400&h=300&fit=crop')">Add to Cart</button></div>
+                <div class="product-card"><img src="https://images.unsplash.com/photo-1585499059648-05e3a1d6a8f9?w=400&h=300&fit=crop" class="product-image" alt="Brown Belt"><div class="product-info"><h3>Brown Dress Belt</h3><div class="product-price">$55.00</div></div><button class="add-to-cart-btn" onclick="openAddToCartModal('Brown Dress Belt', '$55.00', 'https://images.unsplash.com/photo-1585499059648-05e3a1d6a8f9?w=400&h=300&fit=crop')">Add to Cart</button></div>
+                <div class="product-card"><img src="https://images.unsplash.com/photo-1624222247344-550fb60583dc?w=400&h=300&fit=crop" class="product-image" alt="Weave Belt"><div class="product-info"><h3>Casual Weave Belt</h3><div class="product-price">$35.00</div></div><button class="add-to-cart-btn" onclick="openAddToCartModal('Casual Weave Belt', '$35.00', 'https://images.unsplash.com/photo-1624222247344-550fb60583dc?w=400&h=300&fit=crop')">Add to Cart</button></div>
+                <div class="product-card"><img src="https://images.unsplash.com/photo-1585499059648-05e3a1d6a8f9?w=400&h=300&fit=crop" class="product-image" alt="Premium Belt"><div class="product-info"><h3>Premium Buckle Belt</h3><div class="product-price">$75.00</div></div><button class="add-to-cart-btn" onclick="openAddToCartModal('Premium Buckle Belt', '$75.00', 'https://images.unsplash.com/photo-1585499059648-05e3a1d6a8f9?w=400&h=300&fit=crop')">Add to Cart</button></div>
+            </div>
+        </section>
+
+        <!-- Shoes Category -->
+        <section class="category-section">
+            <h2 class="category-title">Shoes</h2>
+            <div class="product-grid">
+                <div class="product-card"><img src="https://images.unsplash.com/photo-1614252369475-324638d1c2b8?w=400&h=300&fit=crop" class="product-image" alt="Oxford Shoes"><div class="product-info"><h3>Oxford Leather Shoes</h3><div class="product-price">$220.00</div></div><button class="add-to-cart-btn" onclick="openAddToCartModal('Oxford Leather Shoes', '$220.00', 'https://images.unsplash.com/photo-1614252369475-324638d1c2b8?w=400&h=300&fit=crop')">Add to Cart</button></div>
+                <div class="product-card"><img src="https://images.unsplash.com/photo-1613987876445-fcb52b0e2d6c?w=400&h=300&fit=crop" class="product-image" alt="Loafers"><div class="product-info"><h3>Loafers</h3><div class="product-price">$180.00</div></div><button class="add-to-cart-btn" onclick="openAddToCartModal('Loafers', '$180.00', 'https://images.unsplash.com/photo-1613987876445-fcb52b0e2d6c?w=400&h=300&fit=crop')">Add to Cart</button></div>
+                <div class="product-card"><img src="https://images.unsplash.com/photo-1608256246200-53e635b5b65f?w=400&h=300&fit=crop" class="product-image" alt="Chelsea Boots"><div class="product-info"><h3>Chelsea Boots</h3><div class="product-price">$250.00</div></div><button class="add-to-cart-btn" onclick="openAddToCartModal('Chelsea Boots', '$250.00', 'https://images.unsplash.com/photo-1608256246200-53e635b5b65f?w=400&h=300&fit=crop')">Add to Cart</button></div>
+                <div class="product-card"><img src="https://images.unsplash.com/photo-1595341888016-a392ef81b7de?w=400&h=300&fit=crop" class="product-image" alt="Sandals"><div class="product-info"><h3>Leather Sandals</h3><div class="product-price">$95.00</div></div><button class="add-to-cart-btn" onclick="openAddToCartModal('Leather Sandals', '$95.00', 'https://images.unsplash.com/photo-1595341888016-a392ef81b7de?w=400&h=300&fit=crop')">Add to Cart</button></div>
+            </div>
+        </section>
+
+        <!-- Leather Jackets Category -->
+        <section class="category-section">
+            <h2 class="category-title">Leather Jackets</h2>
+            <div class="product-grid">
+                <div class="product-card"><img src="https://images.unsplash.com/photo-1551028719-00167b16eac5?w=400&h=300&fit=crop" class="product-image" alt="Bomber Jacket"><div class="product-info"><h3>Classic Bomber Jacket</h3><div class="product-price">$350.00</div></div><button class="add-to-cart-btn" onclick="openAddToCartModal('Classic Bomber Jacket', '$350.00', 'https://images.unsplash.com/photo-1551028719-00167b16eac5?w=400&h=300&fit=crop')">Add to Cart</button></div>
+                <div class="product-card"><img src="https://images.unsplash.com/photo-1559551409-dadc959f76b8?w=400&h=300&fit=crop" class="product-image" alt="Leather Blazer"><div class="product-info"><h3>Leather Blazer</h3><div class="product-price">$420.00</div></div><button class="add-to-cart-btn" onclick="openAddToCartModal('Leather Blazer', '$420.00', 'https://images.unsplash.com/photo-1559551409-dadc959f76b8?w=400&h=300&fit=crop')">Add to Cart</button></div>
+                <div class="product-card"><img src="https://images.unsplash.com/photo-1520975954732-35dd22299614?w=400&h=300&fit=crop" class="product-image" alt="Field Jacket"><div class="product-info"><h3>Field Jacket</h3><div class="product-price">$380.00</div></div><button class="add-to-cart-btn" onclick="openAddToCartModal('Field Jacket', '$380.00', 'https://images.unsplash.com/photo-1520975954732-35dd22299614?w=400&h=300&fit=crop')">Add to Cart</button></div>
+                <div class="product-card"><img src="https://images.unsplash.com/photo-1548126032-079a0fb0099d?w=400&h=300&fit=crop" class="product-image" alt="Shearling Coat"><div class="product-info"><h3>Shearling Coat</h3><div class="product-price">$550.00</div></div><button class="add-to-cart-btn" onclick="openAddToCartModal('Shearling Coat', '$550.00', 'https://images.unsplash.com/photo-1548126032-079a0fb0099d?w=400&h=300&fit=crop')">Add to Cart</button></div>
+            </div>
+        </section>
+
+        <!-- Biker Outfit Category -->
+        <section class="category-section">
+            <h2 class="category-title">Biker Outfit</h2>
+            <div class="product-grid">
+                <div class="product-card"><img src="https://images.unsplash.com/photo-1623626404676-d20d2f50b5c1?w=400&h=300&fit=crop" class="product-image" alt="Racing Jacket"><div class="product-info"><h3>Racing Jacket</h3><div class="product-price">$480.00</div></div><button class="add-to-cart-btn" onclick="openAddToCartModal('Racing Jacket', '$480.00', 'https://images.unsplash.com/photo-1623626404676-d20d2f50b5c1?w=400&h=300&fit=crop')">Add to Cart</button></div>
+                <div class="product-card"><img src="https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=400&h=300&fit=crop" class="product-image" alt="Motorcycle Vest"><div class="product-info"><h3>Motorcycle Vest</h3><div class="product-price">$180.00</div></div><button class="add-to-cart-btn" onclick="openAddToCartModal('Motorcycle Vest', '$180.00', 'https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=400&h=300&fit=crop')">Add to Cart</button></div>
+                <div class="product-card"><img src="https://images.unsplash.com/photo-1622185135505-2d795043906a?w=400&h=300&fit=crop" class="product-image" alt="Rider Pants"><div class="product-info"><h3>Rider Pants</h3><div class="product-price">$220.00</div></div><button class="add-to-cart-btn" onclick="openAddToCartModal('Rider Pants', '$220.00', 'https://images.unsplash.com/photo-1622185135505-2d795043906a?w=400&h=300&fit=crop')">Add to Cart</button></div>
+                <div class="product-card"><img src="https://images.unsplash.com/photo-1605705659700-1b16b6a5f5f5?w=400&h=300&fit=crop" class="product-image" alt="Biker Suit"><div class="product-info"><h3>Full Biker Suit</h3><div class="product-price">$680.00</div></div><button class="add-to-cart-btn" onclick="openAddToCartModal('Full Biker Suit', '$680.00', 'https://images.unsplash.com/photo-1605705659700-1b16b6a5f5f5?w=400&h=300&fit=crop')">Add to Cart</button></div>
+            </div>
+        </section>
+
+        <!-- Animal Skin Designs -->
+        <section class="category-section">
+            <h2 class="category-title">Animal Skin Designs</h2>
+            <div class="product-grid">
+                <div class="product-card"><img src="https://images.unsplash.com/photo-1599940824399-b87987ce0799?w=400&h=300&fit=crop" class="product-image" alt="Crocodile Leather"><div class="product-info"><h3>Crocodile Leather</h3><div class="product-price">$250.00/sq ft</div></div><button class="add-to-cart-btn" onclick="openAddToCartModal('Crocodile Leather', '$250.00', 'https://images.unsplash.com/photo-1599940824399-b87987ce0799?w=400&h=300&fit=crop')">Add to Cart</button></div>
+                <div class="product-card"><img src="https://images.unsplash.com/photo-1606041008023-472dfb5e530f?w=400&h=300&fit=crop" class="product-image" alt="Ostrich Leather"><div class="product-info"><h3>Ostrich Leather</h3><div class="product-price">$180.00/sq ft</div></div><button class="add-to-cart-btn" onclick="openAddToCartModal('Ostrich Leather', '$180.00', 'https://images.unsplash.com/photo-1606041008023-472dfb5e530f?w=400&h=300&fit=crop')">Add to Cart</button></div>
+                <div class="product-card"><img src="https://images.unsplash.com/photo-1533709752211-118fcaf03312?w=400&h=300&fit=crop" class="product-image" alt="Snake Skin"><div class="product-info"><h3>Snake Skin</h3><div class="product-price">$150.00/sq ft</div></div><button class="add-to-cart-btn" onclick="openAddToCartModal('Snake Skin', '$150.00', 'https://images.unsplash.com/photo-1533709752211-118fcaf03312?w=400&h=300&fit=crop')">Add to Cart</button></div>
+                <div class="product-card"><img src="https://images.unsplash.com/photo-1559523161-0fc0d8b38a7a?w=400&h=300&fit=crop" class="product-image" alt="Calfskin Leather"><div class="product-info"><h3>Calfskin Leather</h3><div class="product-price">$65.00/sq ft</div></div><button class="add-to-cart-btn" onclick="openAddToCartModal('Calfskin Leather', '$65.00', 'https://images.unsplash.com/photo-1559523161-0fc0d8b38a7a?w=400&h=300&fit=crop')">Add to Cart</button></div>
+            </div>
+        </section>
+
+        <!-- Add-to-cart selection modal (hidden) -->
+        <div id="addToCartModalBackdrop" class="modal-backdrop-custom">
+            <div class="modal-card">
+                <h4 id="modalProductName">Add to cart</h4>
+                <div style="display:flex;gap:10px;margin-top:10px;align-items:center;">
+                    <img id="modalProductImage" src="" alt="" style="width:90px;height:90px;object-fit:cover;border-radius:6px;">
+                    <div style="flex:1;">
+                        <div id="modalProductPrice" style="font-weight:700;color:#27ae60;"></div>
+                        <label style="margin-top:8px;display:block;font-weight:600;">Size</label>
+                        <select id="modalSize" class="form-select" style="max-width:180px;margin-bottom:8px;">
+                            <option value="S">S</option>
+                            <option value="M" selected>M</option>
+                            <option value="L">L</option>
+                            <option value="XL">XL</option>
+                            <option value="NA">N/A</option>
+                        </select>
+                        <label style="display:block;font-weight:600;">Quantity</label>
+                        <input id="modalQty" type="number" min="1" value="1" class="form-control" style="max-width:120px;">
+                    </div>
+                </div>
+                <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:12px;">
+                    <button onclick="closeAddModal()" class="btn btn-secondary">Cancel</button>
+                    <button onclick="confirmAddToCart()" class="btn btn-success">Add to Cart</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Exit-intent modal (hidden) -->
+        <div id="exitModalBackdrop" class="modal-backdrop-custom">
+            <div class="modal-card" style="text-align:center;">
+                <img src="https://images.unsplash.com/photo-1549298916-7be3bfcf5b42?w=600&h=200&fit=crop" alt="Sad person" style="width:80px;height:80px;border-radius:50%;">
+                <h3 style="margin-top:10px;">Leaving so soon?</h3>
+                <p>Here are a few discounted crocodile skin wallets & purses.</p>
+                <div style="display:flex;gap:10px;justify-content:center;margin-top:10px;flex-wrap:wrap;">
+                    <div style="background:#fafafa;padding:8px;border-radius:8px;width:150px;text-align:left;">
+                        <img src="https://images.unsplash.com/photo-1599940824399-b87987ce0799?w=300&h=180&fit=crop" style="width:100%;height:90px;object-fit:cover;border-radius:6px;">
+                        <div style="font-weight:700;margin-top:6px;">Croc Wallet</div>
+                        <div style="color:#27ae60;font-weight:700;">$49.00</div>
+                    </div>
+                    <div style="background:#fafafa;padding:8px;border-radius:8px;width:150px;text-align:left;">
+                        <img src="https://images.unsplash.com/photo-1595225476474-87563907a212?w=300&h=180&fit=crop" style="width:100%;height:90px;object-fit:cover;border-radius:6px;">
+                        <div style="font-weight:700;margin-top:6px;">Croc Purse</div>
+                        <div style="color:#27ae60;font-weight:700;">$69.00</div>
+                    </div>
+                    <div style="background:#fafafa;padding:8px;border-radius:8px;width:150px;text-align:left;">
+                        <img src="https://images.unsplash.com/photo-1591561954557-26941169b49e?w=300&h=180&fit=crop" style="width:100%;height:90px;object-fit:cover;border-radius:6px;">
+                        <div style="font-weight:700;margin-top:6px;">Croc Card Holder</div>
+                        <div style="color:#27ae60;font-weight:700;">$29.00</div>
+                    </div>
+                </div>
+                <div style="margin-top:12px;"><button onclick="closeExitModal()" class="btn btn-primary">Continue Shopping</button></div>
+            </div>
+        </div>
+
+    </main>
+
+    <footer>
+        <p>&copy; 2026 CHAINZ WEARS. All rights reserved.</p>
+        <p>📞 Our hotlines: 09034580532, 09057236305</p>
+        <p>✉️ Email us: <a href="mailto:mumonwuking20@gmail.com" style="color:#fff;">mumonwuking20@gmail.com</a>, <a href="mailto:mumonwumonica@gmail.com" style="color:#fff;">mumonwumonica@gmail.com</a></p>
+        <p><a href="faq.html" style="color:#fff;">FAQ</a> • <a href="terms.html" style="color:#fff;">Terms</a> • <a href="privacy.html" style="color:#fff;">Privacy</a></p>
+        <p>✉️ Email us: <a href="mailto:mumonwuking20@gmail.com" style="color:#fff;">mumonwuking20@gmail.com</a>, <a href="mailto:mumonwumonica@gmail.com" style="color:#fff;">mumonwumonica@gmail.com</a></p>
+        <p><a href="faq.html" style="color:#fff;">FAQ</a> • <a href="terms.html" style="color:#fff;">Terms</a> • <a href="privacy.html" style="color:#fff;">Privacy</a></p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Display username from registration
+        const storedUsername = sessionStorage.getItem('username');
+        if (storedUsername) {
+            document.getElementById('userNameDisplay').textContent = 'Welcome, ' + storedUsername;
+        }
+
+        // Product database for search
+        const products = [
+            { name: "Classic Leather Tote", category: "Bags", price: "$120.00", image: "https://images.unsplash.com/photo-1590874103328-eac38a683ce7?w=100&h=100&fit=crop" },
+            { name: "Designer Satchel", category: "Bags", price: "$185.00", image: "https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=100&h=100&fit=crop" },
+            { name: "Messenger Bag", category: "Bags", price: "$95.00", image: "https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=100&h=100&fit=crop" },
+            { name: "Leather Backpack", category: "Bags", price: "$150.00", image: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=100&h=100&fit=crop" },
+            { name: "Clutch Purse", category: "Bags", price: "$75.00", image: "https://images.unsplash.com/photo-1591561954557-26941169b49e?w=100&h=100&fit=crop" },
+            { name: "Wallet on Chain", category: "Bags", price: "$89.00", image: "https://images.unsplash.com/photo-1595225476474-87563907a212?w=100&h=100&fit=crop" },
+            { name: "Classic Black Belt", category: "Belts", price: "$45.00", image: "https://images.unsplash.com/photo-1624222247344-550fb60583dc?w=100&h=100&fit=crop" },
+            { name: "Brown Dress Belt", category: "Belts", price: "$55.00", image: "https://images.unsplash.com/photo-1585499059648-05e3a1d6a8f9?w=100&h=100&fit=crop" },
+            { name: "Casual Weave Belt", category: "Belts", price: "$35.00", image: "https://images.unsplash.com/photo-1624222247344-550fb60583dc?w=100&h=100&fit=crop" },
+            { name: "Premium Buckle Belt", category: "Belts", price: "$75.00", image: "https://images.unsplash.com/photo-1585499059648-05e3a1d6a8f9?w=100&h=100&fit=crop" },
+            { name: "Oxford Leather Shoes", category: "Shoes", price: "$220.00", image: "https://images.unsplash.com/photo-1614252369475-324638d1c2b8?w=100&h=100&fit=crop" },
+            { name: "Loafers", category: "Shoes", price: "$180.00", image: "https://images.unsplash.com/photo-1613987876445-fcb52b0e2d6c?w=100&h=100&fit=crop" },
+            { name: "Chelsea Boots", category: "Shoes", price: "$250.00", image: "https://images.unsplash.com/photo-1608256246200-53e635b5b65f?w=100&h=100&fit=crop" },
+            { name: "Classic Bomber Jacket", category: "Jackets", price: "$350.00", image: "https://images.unsplash.com/photo-1551028719-00167b16eac5?w=100&h=100&fit=crop" },
+            { name: "Leather Blazer", category: "Jackets", price: "$420.00", image: "https://images.unsplash.com/photo-1559551409-dadc959f76b8?w=100&h=100&fit=crop" },
+            { name: "Field Jacket", category: "Jackets", price: "$380.00", image: "https://images.unsplash.com/photo-1520975954732-35dd22299614?w=100&h=100&fit=crop" },
+            { name: "Crocodile Leather", category: "Animal Skin", price: "$250.00/sq ft", image: "https://images.unsplash.com/photo-1599940824399-b87987ce0799?w=100&h=100&fit=crop" }
+        ];
+
+        // Search functionality - redirects to search_results.html for broader web image results
+        const searchInput = document.getElementById('productSearch');
+        const suggestionsBox = document.getElementById('searchSuggestions');
+
+        searchInput.addEventListener('input', function(e) {
+            const query = this.value.trim().toLowerCase();
+            suggestionsBox.innerHTML = '';
+            if (query.length < 1) { suggestionsBox.classList.remove('active'); return; }
+
+            const filtered = products.filter(p => p.name.toLowerCase().includes(query) || p.category.toLowerCase().includes(query));
+            if (filtered.length > 0) {
+                filtered.forEach(product => {
+                    const item = document.createElement('div');
+                    item.className = 'suggestion-item';
+                    item.innerHTML = `\n                        <img src="${product.image}" alt="${product.name}">\n                        <span class="name">${product.name}</span>\n                        <span class="category">${product.category}</span>\n                        <span class="suggest-price">${product.price}</span>\n                    `;
+                    item.addEventListener('click', function() {
+                        // Open search results page showing the product and web images
+                        window.location.href = 'search_results.html?q=' + encodeURIComponent(product.name);
+                    });
+                    suggestionsBox.appendChild(item);
+                });
+                suggestionsBox.classList.add('active');
+            } else {
+                suggestionsBox.innerHTML = '<div class="suggestion-item"><span class="name">No products found</span></div>';
+                suggestionsBox.classList.add('active');
+            }
+        });
+
+        // Submit on Enter: go to search_results
+        searchInput.addEventListener('keydown', function(e){
+            if (e.key === 'Enter') {
+                const q = this.value.trim();
+                if (q.length) window.location.href = 'search_results.html?q=' + encodeURIComponent(q);
+            }
+        });
+
+        // Close suggestions when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!searchInput.contains(e.target) && !suggestionsBox.contains(e.target)) {
+                suggestionsBox.classList.remove('active');
+            }
+        });
+
+        // Cart functionality (supports size and qty)
+        let cart = JSON.parse(localStorage.getItem('cart')) || [];
+
+        function saveCart() { localStorage.setItem('cart', JSON.stringify(cart)); }
+
+        function updateCartBadge() {
+            const badge = document.getElementById('cartBadge');
+            const count = cart.reduce((sum, item) => sum + item.qty, 0);
+            badge.textContent = count;
+            badge.classList.toggle('hidden', count === 0);
+        }
+
+        function renderCart() {
+            const cartItems = document.getElementById('cartItems');
+            const cartEmpty = document.getElementById('cartEmpty');
+            const cartFooter = document.getElementById('cartFooter');
+            const cartTotal = document.getElementById('cartTotal');
+            if (cart.length === 0) {
+                cartItems.innerHTML = '';
+                cartEmpty.style.display = 'block';
+                cartFooter.style.display = 'none';
+            } else {
+                cartEmpty.style.display = 'none';
+                cartFooter.style.display = 'block';
+                cartItems.innerHTML = cart.map((item, index) => `\n                    <div class="cart-item">\n                        <img src="${item.image}" alt="${item.name}" class="cart-item-image">\n                        <div class="cart-item-details">\n                            <div class="cart-item-name">${item.name} <small>(${item.size || 'N/A'})</small></div>\n                            <div class="cart-item-price">${item.price}</div>\n                            <div class="cart-item-qty">Qty: ${item.qty}</div>\n                        </div>\n                        <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end;">
+                            <button onclick="decreaseQty(${index})" style="background:none;border:none;color:#3498db;cursor:pointer;">➖</button>
+                            <button onclick="increaseQty(${index})" style="background:none;border:none;color:#3498db;cursor:pointer;">➕</button>
+                            <button onclick="removeFromCart(${index})" style="background:none;border:none;color:red;cursor:pointer;font-size:1rem;">&times;</button>
+                        </div>\n                    </div>\n                `).join('');
+
+                const total = cart.reduce((sum, item) => {
+                    const price = parseFloat(item.price.replace(/[^0-9\.]/g, '')) || 0;
+                    return sum + (price * item.qty);
+                }, 0);
+                cartTotal.textContent = '$' + total.toFixed(2);
+            }
+        }
+
+        function addToCart(name, price, image, size='N/A', qty=1) {
+            const key = name + '|' + size;
+            const existing = cart.find(item => (item.name + '|' + item.size) === key);
+            if (existing) {
+                existing.qty += qty;
+            } else {
+                cart.push({ name, price, image, size, qty });
+            }
+            saveCart(); updateCartBadge(); renderCart();
+            // brief confirmation
+            const msg = `${name} (${size}) x${qty} added to cart`;
+            console.log(msg);
+        }
+
+        function increaseQty(i){ cart[i].qty++; saveCart(); updateCartBadge(); renderCart(); }
+        function decreaseQty(i){ if (cart[i].qty>1) cart[i].qty--; else cart.splice(i,1); saveCart(); updateCartBadge(); renderCart(); }
+        function removeFromCart(index){ cart.splice(index,1); saveCart(); updateCartBadge(); renderCart(); }
+
+        // Modal helpers
+        let modalPending = null;
+        function openAddToCartModal(name, price, image){
+            // Use local image mapping when available
+            const local = (window.getLocalImage) ? window.getLocalImage(name, image) : image;
+            modalPending = { name, price, image: local };
+            document.getElementById('modalProductName').textContent = name;
+            document.getElementById('modalProductPrice').textContent = price;
+            document.getElementById('modalProductImage').src = local;
+            document.getElementById('modalSize').value = 'M';
+            document.getElementById('modalQty').value = 1;
+            document.getElementById('addToCartModalBackdrop').style.display = 'flex';
+        }
+        function closeAddModal(){ modalPending = null; document.getElementById('addToCartModalBackdrop').style.display = 'none'; }
+        function confirmAddToCart(){
+            const size = document.getElementById('modalSize').value;
+            const qty = parseInt(document.getElementById('modalQty').value)||1;
+            addToCart(modalPending.name, modalPending.price, modalPending.image, size, qty);
+            closeAddModal();
+        }
+
+        // Toggle cart dropdown
+        document.getElementById('cartIcon').addEventListener('click', function(e) { e.stopPropagation(); document.getElementById('cartDropdown').classList.toggle('active'); });
+        document.addEventListener('click', function(e) { if (!document.getElementById('cartDropdown').contains(e.target)) document.getElementById('cartDropdown').classList.remove('active'); });
+
+        // Exit-intent
+        let exitShown = false;
+        function showExitModal(){ if (exitShown) return; exitShown = true; document.getElementById('exitModalBackdrop').style.display = 'flex'; }
+        function closeExitModal(){ document.getElementById('exitModalBackdrop').style.display = 'none'; }
+        document.addEventListener('mouseout', function(e){ if (e.clientY < 0) showExitModal(); });
+
+        // Initialize
+        updateCartBadge(); renderCart();
+    </script>
+    <script src="local-image-replacer.js"></script>
+</body>
+</html>
